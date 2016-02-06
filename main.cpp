@@ -14,39 +14,31 @@ void setupUSB(Serial &host,int baudrate,int format_bits,mbed::SerialBase::Parity
 
 //define bit from right to letf(most significant)
 const char BIT[8] = { 0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
-const unsigned byteInterval = 50;
-const unsigned syncInterval = 200;
+const unsigned bitInterval = 50;
+const unsigned syncInterval = bitInterval*8 + 100;
 const unsigned BUFFERSIZE = 4096;
-char testString[] = "12345678ABCDEGHI";
+
 char buffer[4096];
 
 DigitalOut led(LED1);
 
 Serial pc(USBTX, USBRX);
 
-void blinkBuffer(char * buffer)
-{
-    sync(led,syncInterval);//1000ms = 1s
-    blink_str(led,byteInterval,buffer); // 100ms = 0.1s
-    sync(led,syncInterval);  
-}
 int main(void) 
 {
-
     while(true)
     {
       pc.printf("Idle\r\n");
-      wait_ms(1000);
-      if(pc.readable()) // more background knowledge is needed
+      if(pc.readable())
       {
-        pc.printf("Start Reading One File\r\n"); 
-        while(pc.gets(buffer,BUFFERSIZE))
+        sync(led,syncInterval);
+        while(pc.readable()) // more background knowledge is needed
         {
-          pc.printf("I got '%s'\r\n", buffer);
-          blink_str(led,byteInterval,buffer); // this will last a few seconds
+          blink_char(led,bitInterval,pc.getc());
         }
-        pc.printf("Finish Reading One File\r\n"); 
+        sync(led,syncInterval);
       }
+      wait_ms(1000);
     }
     return 0;
 }
