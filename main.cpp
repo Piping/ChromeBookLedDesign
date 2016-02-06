@@ -33,14 +33,6 @@ void blink_char(DigitalOut& led,unsigned int timeInterval,char c)
         blink(led,timeInterval,c & BIT[i]);
     }
 }
-
-void sync(DigitalOut& led,unsigned int timeInterval)
-{
-    led = ON;
-    wait_ms(timeInterval);
-    led = OFF;
-}
-
 void blink_str(DigitalOut& led,unsigned int timeInterval,char* str)
 {
     for(int i=0; str[i]!= '\0'; i++)
@@ -48,12 +40,20 @@ void blink_str(DigitalOut& led,unsigned int timeInterval,char* str)
         blink_char(led,timeInterval,str[i]);
     }
 }
+void sync(DigitalOut& led,unsigned int timeInterval)
+{
+    led = ON;
+    wait_ms(timeInterval);
+    led = OFF;
+}
+
+
 int main(void) {
     while(true)
     {
-        sync(led,1000);
-        blink_str(led,100,testString);
-        sync(led,1000);
+        sync(led,1000);//1000ms = 1s
+        blink_str(led,100,testString); // 100ms = 0.1s
+        sync(led,1000); 
     }
     return 0;
 }
