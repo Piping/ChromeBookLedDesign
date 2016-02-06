@@ -53,7 +53,7 @@ extern "C" {
 #include <limits.h>
 #include <sys/file.h>
 
-#else
+#elif defined(_WIN64) || defined(_WIN32)
 
 #include <windows.h>
 

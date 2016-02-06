@@ -21,8 +21,10 @@ void transferFileToSerialPort(int file_fd, int port_num, int ms){
   char c;
   while( read(file_fd, &c, 1) == 1 ){
     RS232_SendByte(port_num, c);      
-    printf("%c", c); fflush(stdout); //may need to comment this out, since sys.call add delay too
-    usleep(ms*1000); //may need to add delay here, will test that
+    fflush(stdout); //force the character on screen
+    usleep(ms*1000); //gotta wait for led light
+    RS232_PollComport(port_num,(unsigned char *)&c,1);
+    printf("%c", c);
   }
   printf("End of file transfer\n");
 }
@@ -47,7 +49,7 @@ int main(int argc, char* argv[]){
     return 0;
   }
   
-  transferFileToSerialPort(file_fd, port, 100);     
+  transferFileToSerialPort(file_fd, port, 50*8);     
 
 	return 0;
 }

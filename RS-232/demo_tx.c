@@ -26,11 +26,10 @@ compile with the command: gcc demo_tx.c rs232.c -Wall -Wextra -o2 -o test_tx
 int main()
 {
   int i=0,
-      cport_nr=0,        /* /dev/ttyS0 (COM1 on windows) */
+      cport_nr=24,        /* /dev/ttyACM0 (COM1 on windows) */
       bdrate=9600;       /* 9600 baud */
 
-  char mode[]={'8','N','1',0},
-       str[2][512];
+  char mode[]="8N1", str[2][512];
 
 
   strcpy(str[0], "The quick brown fox jumped over the lazy grey dog.\n");
@@ -51,11 +50,7 @@ int main()
 
     printf("sent: %s\n", str[i]);
 
-#ifdef _WIN32
-    Sleep(1000);
-#else
     usleep(1000000);  /* sleep for 1 Second */
-#endif
 
     i++;
 

@@ -34,7 +34,9 @@ int main(void)
         sync(led,syncInterval);
         while(pc.readable()) // more background knowledge is needed
         {
-          blink_char(led,bitInterval,pc.getc());
+          char c = pc.getc();
+          blink_char(led,bitInterval,c);
+          pc.putc(c);
         }
         sync(led,syncInterval);
       }

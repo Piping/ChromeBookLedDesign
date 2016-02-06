@@ -26,7 +26,7 @@ compile with the command: gcc demo_rx.c rs232.c -Wall -Wextra -o2 -o test_rx
 int main()
 {
   int i, n,
-      cport_nr=0,        /* /dev/ttyS0 (COM1 on windows) */
+      cport_nr=24,        /* /dev/ttyACM0 (COM1 on windows) */
       bdrate=9600;       /* 9600 baud */
 
   unsigned char buf[4096];
