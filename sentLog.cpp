@@ -23,7 +23,7 @@ void transferFileToSerialPort(int file_fd, int port_num, int ms){
     RS232_SendByte(port_num, c);      
     fflush(stdout); //force the character on screen
     usleep(ms*1000); //gotta wait for led light
-    RS232_PollComport(port_num,(unsigned char *)&c,1);
+    RS232_PollComport(port_num,(unsigned char *)&c,1); // add while loop to consume string
     printf("%c", c);
   }
   printf("End of file transfer\n");
