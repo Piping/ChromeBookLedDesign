@@ -1,0 +1,2 @@
+sentLog: sentLog.cpp ./RS-232/rs232.c
+	gcc sentLog.cpp ./RS-232/rs232.c -Wall -o log -o2

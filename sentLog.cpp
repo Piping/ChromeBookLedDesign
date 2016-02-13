@@ -1,8 +1,7 @@
 
 #include <stdio.h>
 #include "./RS-232/rs232.h"
-
-//compile command: gcc sentLog.cpp ./RS-232/rs232.c -Wall - -o log-o2
+#include "rtos.h"
 
 extern char comports[38][16]; // defined in rs232.c
 
