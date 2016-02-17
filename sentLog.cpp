@@ -23,7 +23,7 @@ void transferFileToSerialPort(int file_fd, int port_num, int ms){
     usleep(ms*1000); //gotta wait for led light
     if( RS232_PollComport(port_num,(unsigned char *)&c,1) == 1);
       printf("%c", c);
-  }
+}
   printf("End of file transfer\n");
 }
 
