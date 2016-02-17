@@ -1,7 +1,6 @@
 
 #include <stdio.h>
 #include "./RS-232/rs232.h"
-#include "rtos.h"
 
 extern char comports[38][16]; // defined in rs232.c
 
@@ -22,8 +21,8 @@ void transferFileToSerialPort(int file_fd, int port_num, int ms){
     RS232_SendByte(port_num, c);      
     fflush(stdout); //force the character on screen
     usleep(ms*1000); //gotta wait for led light
-    RS232_PollComport(port_num,(unsigned char *)&c,1);
-    printf("%c", c);
+    if( RS232_PollComport(port_num,(unsigned char *)&c,1) == 1);
+      printf("%c", c);
   }
   printf("End of file transfer\n");
 }

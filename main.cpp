@@ -1,85 +1,75 @@
 #include "mbed.h"
 #include "rtos.h"
-#include "./RS-232/rs232.h"
-
+#include "led.h"
+#include "bufferdserial.h"
 #include <stdio.h>
-#define ON 1;
-#define OFF 0; 
+#include <string.h>
 
-void blink(DigitalOut& led,unsigned int ms,bool one);
-void blink_char(DigitalOut& led,unsigned int ms,char c);
-void blink_str(DigitalOut& led,unsigned int ms,char* str);
-void sync(DigitalOut& led,unsigned int ms);
-void setupUSB(Serial &host,int baudrate,int format_bits,mbed::SerialBase::Parity format_pari, int format_stopBit);
-
-//define bit from right to letf(most significant)
-//use 1 << i to define the mask
-const char BIT[8] = { 0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
-const unsigned bitInterval = 50;
-const unsigned syncInterval = bitInterval*8 + 100;
 const unsigned BUFFERSIZE = 4096;
+//BufferedSerial gtkterm(USBTX, USBRX);
+//BufferedSerial gtkterm(p13,p14);  // UART1 - p13, p14
+// Line buffers for sprintf and sscanf
+char data[512]="a\r\n";
+ 
 
-char buffer[4096];
+ 
+BufferedSerial pc(USBTX, USBRX); // tx, rx
+extern PwmOut led[4];
 
-DigitalOut led(LED1);
-
-Serial pc(USBTX, USBRX);
-
-int main(void) 
+void serial_buffer_thread(const void *args)
 {
-    while(true)
+  char str[]="Serial Worker started\r\n";
+  pc.sendFrame((uint8_t*)str,strlen(str));
+  while(1)
+  {
+    pc.recvFrame((uint8_t*)data,512);
+    pc.sendFrame((uint8_t*)data,strlen(data));
+  }
+}
+ 
+void led_control_thread(const void *args)
+{
+  pc.printf("Press 'w' to turn LED1 brightness up, 's' to turn it down\r\n");
+  pc.printf("Use number 1-4 to select LED\r\n");
+  float brightness[4]{0.1};
+  int select = 1;
+  while(1) 
+  {
+    char c;
+    pc.recvFrame((uint8_t*)&c,1);
+    switch (c)
     {
-      pc.printf("Idle\r\n");
-      if(pc.readable())
-      {
-        sync(led,syncInterval);
-        while(pc.readable()) // more background knowledge is needed
-        {
-          char c = pc.getc();
-          blink_char(led,bitInterval,c);
-          pc.putc(c);
+      case 'w' :
+        if((c == 'w') && (brightness[select-1] < 0.5)) {
+            brightness[select-1] += 0.01;
+            led[select-1] = brightness[select-1];
         }
-        sync(led,syncInterval);
-      }
-      wait_ms(1000);
+        break;
+      case 's' :
+        if((c == 's') && (brightness[select-1] > 0.0)) {
+            brightness[select-1] -= 0.01;
+            led[select-1] = brightness[select-1];
+        } 
+        break;
+      case '1':
+        select = 1;
+        break;
+      case '2':
+        select = 2;
+        break;
+      case '3':
+        select = 3;
+        break;
+      case '4':
+        select = 4;
+        break;                    
     }
-    return 0;
-}
-void setupUSB(Serial &host,int baudrate,int format_bits,mbed::SerialBase::Parity format_pari, int format_stopBit)
-{
-    host.baud(baudrate);
-    host.format(format_bits,format_pari,format_stopBit);
+  }
+} 
+ 
+int main() {
+  Thread led_worker(led_control_thread);
+  Thread serial_worker(serial_buffer_thread);
+  while(1){led[0] = led[0] > 0.9 ? 0.01: led[0]+0.0001;}
 }
 
-void sync(DigitalOut& led,unsigned int ms)
-{
-    led = ON;
-    wait_ms(ms);
-    led = OFF;
-}
-void blink(DigitalOut& led,unsigned int ms,bool one)
-{
-    if(one)
-    {   
-        led = ON;
-        wait_ms(ms);
-        led = OFF;
-    }
-    else
-    {
-        wait_ms(ms);
-    }
-}
-void blink_char(DigitalOut& led,unsigned int ms,char c)
-{
-    for(int i = 0; i<8 ; i++){
-      blink(led,ms,c& (1<<i));
-    }
-}
-void blink_str(DigitalOut& led,unsigned int ms,char* str)
-{
-    for(int i=0; str[i]!= '\0'; i++)
-    {
-        blink_char(led,ms,str[i]);
-    }
-}
